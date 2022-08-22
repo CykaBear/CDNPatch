@@ -1,4 +1,0 @@
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CNDPatch\Assemblies\CNDPatch.dll
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CNDPatch\Source\CNDPatch\obj\Debug\CNDPatch.csproj.AssemblyReference.cache
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CNDPatch\Source\CNDPatch\obj\Debug\CNDPatch.csproj.CoreCompileInputs.cache
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CNDPatch\Source\CNDPatch\obj\Debug\CNDPatch.dll
