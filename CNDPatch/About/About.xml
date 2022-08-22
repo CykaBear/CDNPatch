@@ -5,7 +5,7 @@
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<packageId>CykaBear.CNDPatch</packageId>
+	<packageId>cykabear.cndpatch</packageId>
 	<description>
 		A mod that patches Colonists Never Die to allow certain methods of killing them.
 	</description>
@@ -16,10 +16,16 @@
 			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
 			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
 		</li>
+		<li>
+			<packageId>bustedbunny.colonistsneverdie</packageId>
+			<displayName>Colonists Never Die</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2591887912</steamWorkshopUrl>
+		</li>
 	</modDependencies>
 	<loadAfter>
 		<li>Ludeon.RimWorld</li>
 		<li>Ludeon.RimWorld.Royalty</li>
 		<li>brrainz.harmony</li>
+		<li>bustedbunny.colonistsneverdie</li>
 	</loadAfter>
 </ModMetaData>
