@@ -14,6 +14,7 @@ namespace CNDPatch
 
 	public class CNDPatcher
 	{
+		
 		[StaticConstructorOnStartup]
 		internal static class HarmonyInit
 		{
@@ -26,17 +27,17 @@ namespace CNDPatch
 		[HarmonyPatch]
 		private class HealthPatcher
 		{
-			 static MethodBase TargetMethod()
+			static MethodBase TargetMethod()
 			{
 				// Targetting method from Colonists Never Die that handles part health
 				var type = AccessTools.FirstInner(typeof(ColonistsNeverDie.ColonistsNeverDie), t => t.Name.Contains("GetPartHealthPatch"));
 				return AccessTools.FirstMethod(type, method => method.Name.Contains("Postfix"));
 			}
 
-			 static bool Prefix()
+			static bool Prefix()
 			{
 				// Stop their code from running
-				return false;
+				return true;
 
 			}
 		}
@@ -44,27 +45,48 @@ namespace CNDPatch
 		[HarmonyPatch]
 		private class DeathPatcher
 		{
-			 static MethodBase TargetMethod()
+			static MethodBase TargetMethod()
 			{
 				// Target method from Colonists Never Die that handles the death prefix
 				var type = AccessTools.FirstInner(typeof(ColonistsNeverDie.ColonistsNeverDie), t => t.Name.Contains("TryGetAttackVerbPatch"));
 				return AccessTools.FirstMethod(type, method => method.Name.Contains("Prefix"));
 			}
 
-			 static void Postfix(ref bool __result,Pawn __instance)
+			static void Postfix(ref bool __result, Pawn __instance)
 			{
 				// Cancel the results of their prefix
-					__result = true;
+				__result = true;
 
 
 			}
 		}
-		[HarmonyPatch(typeof(Pawn),"Kill")] // Run our own patch on pawn deaths
-		private class NewPatcher {
+		[HarmonyPatch]
+		private class CNDBodyPartPatcher
+		{
+			static MethodBase TargetMethod()
+			{
+				var type = AccessTools.FirstInner(typeof(ColonistsNeverDie.ColonistsNeverDie), t => t.Name.Contains("GetPartHealthPatch"));
+				return AccessTools.FirstMethod(type, method => method.Name.Contains("Postfix"));
+			}
 
-			static bool Prefix(Pawn __instance,DamageInfo? dinfo, Hediff exactCulprit) {
-				if (__instance.IsColonist)
+			static bool Prefix()
+			{
+
+				return false;
+			}
+		}
+
+
+
+		[HarmonyPatch(typeof(Pawn), "Kill")] // Run our own patch on pawn deaths
+		private class NewPatcher
+		{
+
+			static bool Prefix(Pawn __instance, DamageInfo? dinfo, Hediff exactCulprit)
+			{
+				if (__instance.IsColonist && !__instance.Dead)
 				{
+
 					if (dinfo != null)
 					{
 						String usefulDamageInfo = dinfo.ToString().Split(',')[0]; // Check if they were damaged by an execution cut to allow death
@@ -96,7 +118,7 @@ namespace CNDPatch
 							}
 						}
 					}
-					int lungCount = 0; 
+					int lungCount = 0;
 					int kidneyCount = 0;
 
 					foreach (Hediff_MissingPart v in __instance.health.hediffSet.GetMissingPartsCommonAncestors())
@@ -157,7 +179,58 @@ namespace CNDPatch
 				}
 				return true;
 			}
-		
+
+		}
+		[RimWorld.DefOf]
+		public static class DefOf
+		{
+			public static BodyPartGroupDef Waist;
+
+			public static BodyPartGroupDef Neck;
+
+			public static BodyPartDef Ear;
+
+			static DefOf()
+			{
+				DefOfHelper.EnsureInitializedInCtor(typeof(DefOf));
+			}
+		}
+		[HarmonyPatch(typeof(HediffSet), "GetPartHealth")]
+		private class GetPartHealthPatch
+		{
+			
+			private static readonly List<BodyPartGroupDef> vitalgroups = new List<BodyPartGroupDef>
+		{
+			DefOf.Neck,
+			BodyPartGroupDefOf.Torso,
+			DefOf.Waist,
+			BodyPartGroupDefOf.UpperHead
+		};
+
+			public static void Postfix(ref float __result, BodyPartRecord part, HediffSet __instance)
+			{
+
+
+				if (!__instance.pawn.IsColonist)
+				{
+					return;
+				}
+
+
+				foreach (BodyPartGroupDef vitalgroup in vitalgroups)
+				{
+					
+					if (part.IsInGroup(vitalgroup))
+					{
+						if (part.IsInGroup(vitalgroup) && !__instance.PartIsMissing(part) && !__instance.HasHediff(HediffDefOf.SurgicalCut))
+						{
+							float num = Mathf.RoundToInt(Mathf.Max(__result, 1f));
+							__result = num;
+							return;
+						}
+					}
+				}
+			}
 		}
 	}
 
